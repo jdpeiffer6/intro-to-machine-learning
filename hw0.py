@@ -3,6 +3,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+def find_misclassified(w, x, y):
+    idxs = np.arange(x.shape[0])
+    np.random.shuffle(idxs)
+    for i in range(x.shape[0]):
+        prediction = np.sign(np.sum(w*x[idxs[i],:]))
+        if prediction != y[idxs[i]]:
+            return idxs[i]
+    return -1
 
 def perceptron_learn(data_in):
     # Run PLA on the input data
@@ -14,7 +22,25 @@ def perceptron_learn(data_in):
     #        iterations: The number of iterations the algorithm ran for
 
     # Your code here, assign the proper values to w and iterations:
+    max_iter = 10000000
+    print(data_in)
+    X = data_in[:,0:-1]
+    Y = data_in[:,-1]
+    w = np.zeros(X.shape[1])
 
+    iterations = 0
+    while iterations < max_iter:
+        mis_idx = find_misclassified(w,X,Y)
+        if mis_idx != -1:
+            w_t1 = w + Y[mis_idx]*X[mis_idx,]
+            w = w_t1
+        else:
+            x_plt = np.linspace(-100,100,1000)
+            y_plt = (-w[1]*x_plt-w[0])/w[2]
+            plt.plot(x_plt,y_plt,c='y',linestyle='dashed')
+            plt.show()
+            return w,iterations
+        iterations += 1
     return w, iterations
 
 
@@ -29,55 +55,83 @@ def perceptron_experiment(N, d, num_exp):
     #          bounds_minus_ni is the difference between the theoretical bound and the actual number of iterations
     # (both the outputs should be num_exp long)
 
+    # Your code here, assign the values to num_iters and bounds_minus_ni:
+
     # Initialize the return variables
     num_iters = np.zeros((num_exp,))
     bounds_minus_ni = np.zeros((num_exp,))
 
-    N=100
-    d=2
     # Generate dataset
-    x = np.random.rand(N,d)
+    x = np.random.uniform(low=-100,high=100,size=[N,d])
     x_0 = np.ones([N,1])
     X = np.concatenate((x_0,x),axis=1)
 
     w_star = np.random.uniform(low=-1,high=1, size=d+1)
 
-    Y = np.zeros(N)
+    Y = np.zeros([N,1])
     for i in range(N):
         if np.sum(X[i,]*w_star) >= 0:
             Y[i] = 1
-            plt.scatter(X[:,1],X[:,2],c="green")
+            plt.scatter(X[i,1],X[i,2],c="green")
         else:
             Y[i] = -1
-            plt.scatter(X[:,1],X[:,2],c="red")
+            plt.scatter(X[i,1],X[i,2],c="red")
 
- 
-    x = np.linspace(0,1,100)
+    x = np.linspace(-100,100,1000)
     y = (-w_star[1]*x-w_star[0])/w_star[2]
-    plt.plot(x,y)
-    plt.show()
-    # Your code here, assign the values to num_iters and bounds_minus_ni:
+    plt.plot(x,y,c="blue")
+    plt.xlim([-100,100])
+    plt.ylim([-100,100])
+    # plt.show()
+
+    # compute paramaters
+    rho = float("inf")
+    R = float("-inf")
+    for i in range(N):
+        if np.sum(Y[i]*(w_star*X[i,])) < rho:
+            rho = np.sum(Y[i]*(w_star*X[i,]))
+        if np.linalg.norm(X[i,],ord=2)>R:
+            R = np.linalg.norm(X[i,],ord=2)
+
+    print(rho)
+    print(R)
+
+    tmax = np.ceil(R*R*np.linalg.norm(w_star,ord=2)*np.linalg.norm(w_star,ord=2)/rho/rho)
+    num_iters = []
+    bounds_minus_ni = []
+    dataset = np.concatenate((X,Y),axis=1)
+    for _ in range(num_exp):
+        output = perceptron_learn(dataset)
+        num_iters.append(output[1])
+        bounds_minus_ni.append(tmax-output[1])
 
     return num_iters, bounds_minus_ni
 
 
+# def main():
+#     print("Running the experiment...")
+#     num_iters, bounds_minus_ni = perceptron_experiment(100, 10, 1000)
+
+#     print("Printing histogram...")
+#     plt.hist(num_iters)
+#     plt.title("Histogram of Number of Iterations")
+#     plt.xlabel("Number of Iterations")
+#     plt.ylabel("Count")
+#     plt.show()
+
+#     print("Printing second histogram")
+#     plt.hist(np.log(bounds_minus_ni))
+#     plt.title("Bounds Minus Iterations")
+#     plt.xlabel("Log Difference of Theoretical Bounds and Actual # Iterations")
+#     plt.ylabel("Count")
+#     plt.show()
+
 def main():
     print("Running the experiment...")
-    num_iters, bounds_minus_ni = perceptron_experiment(100, 10, 1000)
+    num_iters, bounds_minus_ni = perceptron_experiment(100, 2, 1)
+    print(num_iters)
+    print(bounds_minus_ni)
 
-    print("Printing histogram...")
-    plt.hist(num_iters)
-    plt.title("Histogram of Number of Iterations")
-    plt.xlabel("Number of Iterations")
-    plt.ylabel("Count")
-    plt.show()
-
-    print("Printing second histogram")
-    plt.hist(np.log(bounds_minus_ni))
-    plt.title("Bounds Minus Iterations")
-    plt.xlabel("Log Difference of Theoretical Bounds and Actual # Iterations")
-    plt.ylabel("Count")
-    plt.show()
 
 if __name__ == "__main__":
     main()
