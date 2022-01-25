@@ -23,7 +23,6 @@ def perceptron_learn(data_in):
 
     # Your code here, assign the proper values to w and iterations:
     max_iter = 10000000
-    print(data_in)
     X = data_in[:,0:-1]
     Y = data_in[:,-1]
     w = np.zeros(X.shape[1])
@@ -35,10 +34,10 @@ def perceptron_learn(data_in):
             w_t1 = w + Y[mis_idx]*X[mis_idx,]
             w = w_t1
         else:
-            x_plt = np.linspace(-100,100,1000)
-            y_plt = (-w[1]*x_plt-w[0])/w[2]
-            plt.plot(x_plt,y_plt,c='y',linestyle='dashed')
-            plt.show()
+            # x_plt = np.linspace(-1,1,1000)
+            # y_plt = (-w[1]*x_plt-w[0])/w[2]
+            # plt.plot(x_plt,y_plt,c='y',linestyle='dashed')
+            # plt.show()
             return w,iterations
         iterations += 1
     return w, iterations
@@ -62,27 +61,27 @@ def perceptron_experiment(N, d, num_exp):
     bounds_minus_ni = np.zeros((num_exp,))
 
     # Generate dataset
-    x = np.random.uniform(low=-100,high=100,size=[N,d])
+    x = np.random.uniform(low=-1,high=1,size=[N,d])
     x_0 = np.ones([N,1])
     X = np.concatenate((x_0,x),axis=1)
 
-    w_star = np.random.uniform(low=-1,high=1, size=d+1)
+    w_star = np.random.uniform(low=0,high=1, size=d+1)
+    w_star[0] = 0
 
     Y = np.zeros([N,1])
     for i in range(N):
         if np.sum(X[i,]*w_star) >= 0:
             Y[i] = 1
-            plt.scatter(X[i,1],X[i,2],c="green")
+            # plt.scatter(X[i,1],X[i,2],c="green")
         else:
             Y[i] = -1
-            plt.scatter(X[i,1],X[i,2],c="red")
+            # plt.scatter(X[i,1],X[i,2],c="red")
 
-    x = np.linspace(-100,100,1000)
-    y = (-w_star[1]*x-w_star[0])/w_star[2]
-    plt.plot(x,y,c="blue")
-    plt.xlim([-100,100])
-    plt.ylim([-100,100])
-    # plt.show()
+    # x = np.linspace(-1,1,1000)
+    # y = (-w_star[1]*x-w_star[0])/w_star[2]
+    # plt.plot(x,y,c="blue")
+    # plt.xlim([-1,1])
+    # plt.ylim([-1,1])
 
     # compute paramaters
     rho = float("inf")
@@ -93,9 +92,6 @@ def perceptron_experiment(N, d, num_exp):
         if np.linalg.norm(X[i,],ord=2)>R:
             R = np.linalg.norm(X[i,],ord=2)
 
-    print(rho)
-    print(R)
-
     tmax = np.ceil(R*R*np.linalg.norm(w_star,ord=2)*np.linalg.norm(w_star,ord=2)/rho/rho)
     num_iters = []
     bounds_minus_ni = []
@@ -105,33 +101,32 @@ def perceptron_experiment(N, d, num_exp):
         num_iters.append(output[1])
         bounds_minus_ni.append(tmax-output[1])
 
+        # #testing if it worked
+        # test_y = Y*0
+        # for i in range(Y.shape[0]):
+        #     test_y[i]=np.sign(np.sum(output[0]*X[i,]))
+        # print(np.sum(Y-test_y))
+
     return num_iters, bounds_minus_ni
 
 
-# def main():
-#     print("Running the experiment...")
-#     num_iters, bounds_minus_ni = perceptron_experiment(100, 10, 1000)
-
-#     print("Printing histogram...")
-#     plt.hist(num_iters)
-#     plt.title("Histogram of Number of Iterations")
-#     plt.xlabel("Number of Iterations")
-#     plt.ylabel("Count")
-#     plt.show()
-
-#     print("Printing second histogram")
-#     plt.hist(np.log(bounds_minus_ni))
-#     plt.title("Bounds Minus Iterations")
-#     plt.xlabel("Log Difference of Theoretical Bounds and Actual # Iterations")
-#     plt.ylabel("Count")
-#     plt.show()
-
 def main():
     print("Running the experiment...")
-    num_iters, bounds_minus_ni = perceptron_experiment(100, 2, 1)
-    print(num_iters)
-    print(bounds_minus_ni)
+    num_iters, bounds_minus_ni = perceptron_experiment(100, 10, 1000)
 
+    print("Printing histogram...")
+    plt.hist(num_iters)
+    plt.title("Histogram of Number of Iterations")
+    plt.xlabel("Number of Iterations")
+    plt.ylabel("Count")
+    plt.show()
+
+    print("Printing second histogram")
+    plt.hist(np.log(bounds_minus_ni))
+    plt.title("Bounds Minus Iterations")
+    plt.xlabel("Log Difference of Theoretical Bounds and Actual # Iterations")
+    plt.ylabel("Count")
+    plt.show()
 
 if __name__ == "__main__":
     main()
