@@ -1,0 +1,28 @@
+(a)
+- What can you say about the generalization properties of the logistic regression model?
+- How does increasing the maximum number of iterations affect the model’s performance?
+
+The logistic regression model generalizes well. The E_in and E_out are consistently very similiar indicating that the is enough data
+for learning to occur, at least with this simple model. Increasing the maximum number of itereations, at least to up to 10^6,
+continues to improve the model's performace. 
+
+(b)
+- Describe how you perform the normalization for the training set and testing set 
+(i.e., what’s the mean and the variance that you use for normalization).
+
+I normalized both the training and testing set to the mean and variance of the training set. This is because we never want to include
+the testing data in training.
+
+- Did normalizing the data affect the performance of the model?
+Normalizing the data increases the performance of the model. Using the same paramaters without normalized data
+yields E_in and E_out (binary) approaching random guessing.
+
+- What is the effect of changing learning rate?
+Changing the learning rate usally arrives at the same error but just at different rates.
+The smallest learning rate takes > 20000 iterations to arrive at the same prediciton model as does 
+a learning rate of 7 (which takes just 44). Too big of a learning rate becomes cumbersome very quickly however.
+Increasing the learning rate to 7.6 makes us take 446 iterations and 7.7 makes us max out the number of iterations at 10^6!
+
+
+
+
