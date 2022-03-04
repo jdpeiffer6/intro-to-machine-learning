@@ -138,25 +138,25 @@ def main():
     max_its = 10**4
     learning_rate = 0.01
     grad_threshold = 10**-6
-    lambdac = [0,0.0001,0.001,0.005,0.01,0.05,0.1]
-    reg = ["L1","L2"]
-    for reg_term in reg:
-        for lambdac_it in lambdac:
-            #run regression
-            tstart = time.time()
-            t,w,e_in = logistic_reg(X_train,y_train,w_0,max_its,learning_rate,grad_threshold,lambdac_it,regularization=reg_term)
-            tend = time.time()
+    lambdac_it = 0.01 
+    reg_term = "L2"
 
-            # stats
-            print("Regularization: %s\nlambda: %f"%(reg_term,lambdac_it))
-            binary_e_in = find_binary_error(w,X_train,y_train)
-            binary_e_out = find_binary_error(w,X_test,y_test)
-            print("Iterations %d"%t)
-            print("Cross Entropy E_in: %.3f"%e_in)
-            print("Binary E_in: %.3f"%binary_e_in)
-            print("Binary E_out: %.3f"%binary_e_out)
-            print("Run time: %.5f sec"%(tend-tstart))
-            print("Number of 0s: %d\n"%np.sum(w==0))
+    #run regression
+    tstart = time.time()
+    t,w,e_in = logistic_reg(X_train,y_train,w_0,max_its,learning_rate,grad_threshold,lambdac_it,regularization=reg_term)
+    tend = time.time()
+
+    # stats
+    print("Regularization: %s\nlambda: %f"%(reg_term,lambdac_it))
+    binary_e_in = find_binary_error(w,X_train,y_train)
+    binary_e_out = find_binary_error(w,X_test,y_test)
+    print("Iterations %d"%t)
+    print("Cross Entropy E_in: %.3f"%e_in)
+    print("Binary E_in: %.3f"%binary_e_in)
+    print("Binary E_out: %.3f"%binary_e_out)
+    print("Run time: %.5f sec"%(tend-tstart))
+    print("Number of 0s: %d\n"%np.sum(w==0))
+    print(w)
     
 
 if __name__ == "__main__":

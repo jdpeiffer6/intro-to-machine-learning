@@ -2,6 +2,7 @@
 # Homework 3 Code
 import numpy as np
 import time
+from sklearn.linear_model import LogisticRegression
 
 def relabelData(data:np.ndarray):
     """Changes labels of 0 to -1 by reference"""
@@ -116,8 +117,8 @@ def main():
     X_train, X_test, y_train, y_test = np.load("digits_preprocess.npy", allow_pickle=True)
     y_train[np.where(y_train==0)] = -1
     y_test[np.where(y_test==0)] = -1
-    y_train.shape = (y_train.size,1)
-    y_test.shape = (y_test.size,1)
+    # y_train.shape = (y_train.size,1)
+    # y_test.shape = (y_test.size,1)
 
     w_0 = np.zeros(X_train.shape[1]+1)
 
@@ -134,29 +135,11 @@ def main():
             X_train[:,i] = X_train[:,i] / norms[1,i]
             X_test[:,i] = X_test[:,i] / norms[1,i]
 
-    #initialize paramaters
-    max_its = 10**4
-    learning_rate = 0.01
-    grad_threshold = 10**-6
-    lambdac = [0,0.0001,0.001,0.005,0.01,0.05,0.1]
-    reg = ["L1","L2"]
-    for reg_term in reg:
-        for lambdac_it in lambdac:
-            #run regression
-            tstart = time.time()
-            t,w,e_in = logistic_reg(X_train,y_train,w_0,max_its,learning_rate,grad_threshold,lambdac_it,regularization=reg_term)
-            tend = time.time()
-
-            # stats
-            print("Regularization: %s\nlambda: %f"%(reg_term,lambdac_it))
-            binary_e_in = find_binary_error(w,X_train,y_train)
-            binary_e_out = find_binary_error(w,X_test,y_test)
-            print("Iterations %d"%t)
-            print("Cross Entropy E_in: %.3f"%e_in)
-            print("Binary E_in: %.3f"%binary_e_in)
-            print("Binary E_out: %.3f"%binary_e_out)
-            print("Run time: %.5f sec"%(tend-tstart))
-            print("Number of 0s: %d\n"%np.sum(w==0))
+    # sklearn
+    model = LogisticRegression(penalty='l2',tol=10**-6,C=1/0.01,max_iter=10**4)
+    model.fit(X_train,y_train)
+    print(model.coef_)
+    a=5 
     
 
 if __name__ == "__main__":
