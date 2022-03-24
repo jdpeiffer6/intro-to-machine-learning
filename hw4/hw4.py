@@ -1,8 +1,5 @@
 #!/usr/bin/python3
 # Homework 4 Code
-from cgi import test
-from re import L
-from black import out
 from sklearn.tree import DecisionTreeClassifier
 from scipy.stats import mode
 import numpy as np
@@ -32,7 +29,7 @@ def bagged_trees(X_train, y_train, X_test, y_test, num_bags,trees,bootstrap_log)
     # plt.imshow(bootstrap_log)
     # plt.show()
 
-    #calculate OOB error try 2
+    #calculate OOB error try
     votes = np.zeros(bootstrap_log.shape,dtype=int)
     s=np.zeros(y_train.size,dtype=int)
     for m,tree in enumerate(trees):
@@ -40,49 +37,15 @@ def bagged_trees(X_train, y_train, X_test, y_test, num_bags,trees,bootstrap_log)
         votes[oob,m] = tree.predict(X_train[oob,:])
         s[oob] += 1
     s = np.where(s!=0)[0]
-    y_oob = np.sum(votes,axis=1) 
-    out_of_bag_error = ~np.equal(y_oob[s],y_train[s])/s.size
-    out_of_bag_error = out_of_bag_error[0]
+    y_oob = np.sign(np.sum(votes,axis=1)) 
+    out_of_bag_error = np.sum(~np.equal(y_oob[s],y_train[s]))/s.size
 
-    # # calculate OOB error
-    # N = y_train.size
-    # s = 0
-    # out_of_bag_error2 = 0
-    # for n in range(N):
-    #     oob = np.where(bootstrap_log[n,:]==0)[0]
-    #     if oob.size==0:
-    #         continue
-    #     s += 1
-    #     x_n = X_train[n,:]
-    #     x_n = x_n.reshape(1,-1)
-    #     predicted=0
-    #     for m in oob:
-    #         predicted += trees[m].predict(x_n)[0]
-    #     h_n = np.sign(predicted)
-    #     out_of_bag_error2 += ~np.equal(h_n,y_train[n])
-    # out_of_bag_error2/=s
-    # print(out_of_bag_error2-out_of_bag_error)
-
-    # caculate test error 2
+    # caculate test error
     votes = np.zeros(y_test.size,dtype=int)
     for m,tree in enumerate(trees):
         votes=np.add(tree.predict(X_test),votes)
     votes = np.sign(votes)
-    test_error = ~np.equal(votes,y_test)/y_test.size
-    test_error = test_error[0]    
-
-    # # caculate test error
-    # test_error = 0
-    # for n in range(y_test.size):
-    #     predicted = 0
-    #     x_n = X_test[n,:]
-    #     x_n = x_n.reshape(1,-1)
-    #     for tree in trees:
-    #         predicted += tree.predict(x_n)[0]
-    #     h_n = np.sign(predicted)
-    #     test_error += ~np.equal(h_n,y_test[n]) 
-    # test_error /= y_test.size
-
+    test_error = np.sum(~np.equal(votes,y_test))/y_test.size
     return out_of_bag_error, test_error
 
 def single_decision_tree(X_train, y_train, X_test, y_test):
@@ -105,7 +68,7 @@ def main_hw4():
 
     #subset data
     # 1 vs 3 or 3 vs 5
-    num1 = 5
+    num1 = 1
     num2 = 3
     test_data = og_test_data[np.where((og_test_data[:,0]==num1) | (og_test_data[:,0]==num2))[0],:]
     train_data = og_train_data[np.where((og_train_data[:,0]==num1) | (og_train_data[:,0]==num2))[0],:]
@@ -148,7 +111,8 @@ def main_hw4():
         out_of_bag_error, test_error = bagged_trees(X_train, y_train, X_test, y_test, n_bags, trees[:n_bags],bootstrap_log[:,:n_bags])
         oob_error.append(out_of_bag_error)
         test_e.append(test_error)
-        print(n_bags/num_bags)
+        if n_bags % 20 == 0:
+            print(n_bags/num_bags) 
     plt.plot(np.arange(1,num_bags+1,1),oob_error)
     plt.plot(np.arange(1,num_bags+1,1),test_e)
     plt.legend(["OOB Error","Test Error"])
