@@ -66,63 +66,66 @@ def main_hw4():
     og_train_data = np.genfromtxt('zip.train')
     og_test_data = np.genfromtxt('zip.test')
 
+    numbers = ((1,3),(3,5))
+    for num in numbers:
     #subset data
-    # 1 vs 3 or 3 vs 5
-    num1 = 1
-    num2 = 3
-    test_data = og_test_data[np.where((og_test_data[:,0]==num1) | (og_test_data[:,0]==num2))[0],:]
-    train_data = og_train_data[np.where((og_train_data[:,0]==num1) | (og_train_data[:,0]==num2))[0],:]
-    
-    # Split data
-    X_train = train_data[:,1:]
-    y_train = train_data[:,0]
-    y_train[np.where(y_train==num1)]=int(-1)
-    y_train[np.where(y_train==num2)]=int(1)
+        num1 = num[0]
+        num2 = num[1]
+        test_data = og_test_data[np.where((og_test_data[:,0]==num1) | (og_test_data[:,0]==num2))[0],:]
+        train_data = og_train_data[np.where((og_train_data[:,0]==num1) | (og_train_data[:,0]==num2))[0],:]
+        
+        # Split data
+        X_train = train_data[:,1:]
+        y_train = train_data[:,0]
+        y_train[np.where(y_train==num1)]=int(-1)
+        y_train[np.where(y_train==num2)]=int(1)
 
-    X_test = test_data[:,1:]
-    y_test = test_data[:,0]
-    y_test[np.where(y_test==num1)]=int(-1)
-    y_test[np.where(y_test==num2)]=int(1)
+        X_test = test_data[:,1:]
+        y_test = test_data[:,0]
+        y_test[np.where(y_test==num1)]=int(-1)
+        y_test[np.where(y_test==num2)]=int(1)
 
-    # create bootstrapped dataset
-    trees:List[DecisionTreeClassifier] = []
-    bootstrap_log=np.zeros((y_train.size,200),dtype=int)
-    N = y_train.size
-    for m in range(200):
-        #create dataset
-        indexes = np.random.choice(N,N)   #is it ok that not every point here is unique?
-        # indexes = np.unique(indexes)
-        X_bag = X_train[indexes,:]
-        y_bag = y_train[indexes]
-        bootstrap_log[indexes,m] = 1
+        # create bootstrapped dataset
+        trees:List[DecisionTreeClassifier] = []
+        bootstrap_log=np.zeros((y_train.size,200),dtype=int)
+        N = y_train.size
+        for m in range(200):
+            #create dataset
+            indexes = np.random.choice(N,N)   #is it ok that not every point here is unique?
+            # indexes = np.unique(indexes)
+            X_bag = X_train[indexes,:]
+            y_bag = y_train[indexes]
+            bootstrap_log[indexes,m] = 1
 
-        #train individual tree
-        tree = DecisionTreeClassifier(criterion='entropy')
-        tree.fit(X_bag,y_bag)
-        trees.append(tree)    #add to forest
+            #train individual tree
+            tree = DecisionTreeClassifier(criterion='entropy')
+            tree.fit(X_bag,y_bag)
+            trees.append(tree)    #add to forest
 
-    # plt.imshow(bootstrap_log)
-    # plt.show()
-    # Run bagged trees
-    oob_error = []
-    test_e = []
-    num_bags = 200
-    for n_bags in range(1,num_bags+1):
-        out_of_bag_error, test_error = bagged_trees(X_train, y_train, X_test, y_test, n_bags, trees[:n_bags],bootstrap_log[:,:n_bags])
-        oob_error.append(out_of_bag_error)
-        test_e.append(test_error)
-        if n_bags % 20 == 0:
-            print(n_bags/num_bags) 
-    plt.plot(np.arange(1,num_bags+1,1),oob_error)
-    plt.plot(np.arange(1,num_bags+1,1),test_e)
-    plt.legend(["OOB Error","Test Error"])
-    train_error, test_error = single_decision_tree(X_train, y_train, X_test, y_test)
-    print("Single train, test error: %.3f,%.3f"%(train_error,test_error))
-    t2 = time()
-    print("Execution Time: %.0f s"%(t2-t1))
-    plt.xlabel("# of Bags")
-    plt.ylabel("Out of Bag Error")
-    plt.show()
+        # plt.imshow(bootstrap_log)
+        # plt.show()
+        # Run bagged trees
+        oob_error = []
+        test_e = []
+        num_bags = 200
+        for n_bags in range(1,num_bags+1):
+            out_of_bag_error, test_error = bagged_trees(X_train, y_train, X_test, y_test, n_bags, trees[:n_bags],bootstrap_log[:,:n_bags])
+            oob_error.append(out_of_bag_error)
+            test_e.append(test_error)
+            if n_bags % 20 == 0:
+                print(n_bags/num_bags) 
+        plt.plot(np.arange(1,num_bags+1,1),oob_error)
+        train_error, test_error = single_decision_tree(X_train, y_train, X_test, y_test)
+        print("Single train, test error: %.3f,%.3f"%(train_error,test_error))
+        print("First tree test error: %.3f"%test_e[0])
+        print("200 tree test error: %.3f"%test_e[-1])
+        print("OOB Error (200): %.3f"%oob_error[-1])
+        t2 = time()
+        print("Execution Time: %.0f s"%(t2-t1))
+        plt.xlabel("# of Bags")
+        plt.title(str(num1) + " versus " + str(num2))
+        plt.ylabel("Out of Bag Error")
+        plt.show()
 
 if __name__ == "__main__":
     main_hw4()
